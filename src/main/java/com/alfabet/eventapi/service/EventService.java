@@ -26,4 +26,10 @@ public interface EventService {
 	List<Event> findAllEventsByOrderByPopularity();
 
 	List<Event> findAllEventsByOrderByCreationTime();
+
+	List<Event> saveAll(List<Event> events);
+
+	List<Event> updateAll(List<Event> events);
+
+	void deleteAllByIds(List<Long> ids);
 }

@@ -24,45 +24,63 @@ import com.alfabet.eventapi.service.EventService;
 @RequestMapping("/events")
 public class EventController {
 
-    @Autowired
-    private EventService eventService;
+	@Autowired
+	private EventService eventService;
 
-    @PostMapping("/events")
-    public ResponseEntity<Event> createEvent(@RequestBody Event event) {
-        Event createdEvent = eventService.save(event);
-        return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
-    }
-    @GetMapping("/events/{id}")
-    public ResponseEntity<Event> getEventById(@PathVariable Long id) {
-        Optional<Event> eventOptional = eventService.findById(id);
-        if(eventOptional.isPresent()) {
-            return new ResponseEntity<>(eventOptional.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-    @GetMapping("/events/getallevents")
-    public ResponseEntity<List<Event>> getAllEvents(
-            @RequestParam(required = false) String location,
-            @RequestParam(required = false) String sort,
-            @RequestParam(defaultValue = "asc") String sortOrder) {
-        List<Event> events = eventService.findAll(location, sort, sortOrder);
-        return ResponseEntity.ok(events);
-    }
-    @PutMapping("/events/{id}")
-    public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody Event eventDetails) {
-        try {
-            Event updatedEvent = eventService.updateEvent(id, eventDetails);
-            return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
-        } catch(ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-    @DeleteMapping("/events/{id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
-    	eventService.deleteById(id);
-    	return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-}
+	@PostMapping("/events")
+	public ResponseEntity<Event> createEvent(@RequestBody Event event) {
+		Event createdEvent = eventService.save(event);
+		return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
+	}
 
-    // Implement other CRUD operations as needed...
+	@GetMapping("/events/{id}")
+	public ResponseEntity<Event> getEventById(@PathVariable Long id) {
+		Optional<Event> eventOptional = eventService.findById(id);
+		if (eventOptional.isPresent()) {
+			return new ResponseEntity<>(eventOptional.get(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@GetMapping("/events/getallevents")
+	public ResponseEntity<List<Event>> getAllEvents(@RequestParam(required = false) String location,
+			@RequestParam(required = false) String sort, @RequestParam(defaultValue = "asc") String sortOrder) {
+		List<Event> events = eventService.findAll(location, sort, sortOrder);
+		return ResponseEntity.ok(events);
+	}
+
+	@PutMapping("/events/{id}")
+	public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody Event eventDetails) {
+		try {
+			Event updatedEvent = eventService.updateEvent(id, eventDetails);
+			return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
+		} catch (ResourceNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@DeleteMapping("/events/{id}")
+	public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
+		eventService.deleteById(id);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@PostMapping("/batch")
+	public ResponseEntity<List<Event>> createEvents(@RequestBody List<Event> events) {
+		List<Event> createdEvents = eventService.saveAll(events);
+		return new ResponseEntity<>(createdEvents, HttpStatus.CREATED);
+	}
+
+	@PutMapping("/batch")
+	public ResponseEntity<List<Event>> updateEvents(@RequestBody List<Event> events) {
+		List<Event> updatedEvents = eventService.updateAll(events);
+		return new ResponseEntity<>(updatedEvents, HttpStatus.OK);
+	}
+
+	@DeleteMapping("/batch")
+	public ResponseEntity<Void> deleteEvents(@RequestBody List<Long> eventIds) {
+		eventService.deleteAllByIds(eventIds);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
 }
