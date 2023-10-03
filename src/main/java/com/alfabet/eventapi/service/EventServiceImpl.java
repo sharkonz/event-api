@@ -126,4 +126,21 @@ public class EventServiceImpl implements EventService {
 	public List<Event> findAllEventsByOrderByCreationTime() {
 		return eventRepository.findAllByOrderByCreationTimeAsc();
 	}
+
+	@Override
+	public List<Event> saveAll(List<Event> events) {
+		return eventRepository.saveAll(events);
+	}
+
+	@Override
+	public List<Event> updateAll(List<Event> events) {
+		// You'd loop through the events and update them using your logic
+		// For simplicity, we'll just use the saveAll method here
+		return eventRepository.saveAll(events);
+	}
+
+	@Override
+	public void deleteAllByIds(List<Long> ids) {
+		eventRepository.deleteAllById(ids);
+	}
 }
