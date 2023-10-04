@@ -30,7 +30,7 @@ public class RateLimiterTest {
     
     @Test
     public void testRateLimiting() throws Exception {
-        // Assuming you've set a limit of 10 requests per minute
+        // Assuming limit of 10 requests per minute
         for (int i = 0; i < 10; i++) {
             mockMvc.perform(MockMvcRequestBuilders.get("/events/events/getallevents"))
                 .andExpect(status().isOk());
