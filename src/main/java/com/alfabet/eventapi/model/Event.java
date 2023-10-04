@@ -41,8 +41,8 @@ public class Event {
 	@ManyToMany
 	@JoinTable(name = "event_subscriber", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "subscriber_id"))
 	private Set<Subscriber> subscribers = new HashSet<>();
-	
-    public Event(Long id) {
+
+	public Event(Long id) {
 		super();
 		this.id = id;
 	}

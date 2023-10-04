@@ -1,7 +1,6 @@
 package com.alfabet.eventapi.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -28,58 +27,55 @@ public class EventController {
 	@Autowired
 	private EventService eventService;
 
-	@PostMapping("/events")
-	public ResponseEntity<Event> createEvent(@RequestBody Event event) {
+	@PostMapping
+	public ResponseEntity<Event> create(@RequestBody Event event) {
 		Event createdEvent = eventService.save(event);
-		return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
+		return ResponseEntity.status(HttpStatus.CREATED).body(createdEvent);
 	}
 
-	@GetMapping("/events/{id}")
-	public ResponseEntity<Event> getEventById(@PathVariable Long id) {
-		Optional<Event> eventOptional = eventService.findById(id);
-		if (eventOptional.isPresent()) {
-			return new ResponseEntity<>(eventOptional.get(), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+	@GetMapping("/{id}")
+	public ResponseEntity<Event> getById(@PathVariable Long id) {
+		return eventService.findById(id).map(event -> ResponseEntity.ok(event))
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
-	@GetMapping("/events/getallevents")
-	public ResponseEntity<List<Event>> getAllEvents(@RequestParam(required = false) String location,
+	@GetMapping("/getallevents")
+	public ResponseEntity<List<Event>> getAll(@RequestParam(required = false) String location,
 			@RequestParam(required = false) String sort, @RequestParam(defaultValue = "asc") String sortOrder) {
+
 		List<Event> events = eventService.findAll(location, sort, sortOrder);
 		return ResponseEntity.ok(events);
 	}
 
-	@PutMapping("/events/{id}")
-	public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody Event eventDetails) {
+	@PutMapping("/{id}")
+	public ResponseEntity<Event> update(@PathVariable Long id, @RequestBody Event eventDetails) {
 		try {
 			Event updatedEvent = eventService.updateEvent(id, eventDetails);
-			return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
+			return ResponseEntity.ok(updatedEvent);
 		} catch (ResourceNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return ResponseEntity.notFound().build();
 		}
 	}
 
-	@DeleteMapping("/events/{id}")
-	public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		eventService.deleteById(id);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/batch")
-	public ResponseEntity<BatchResult<Event>> saveOrUpdateAll(@RequestBody List<Event> events) {
-	    BatchResult<Event> result = eventService.saveOrUpdateAll(events);
-	    if (result.getFailedOps().isEmpty()) {
-	        return new ResponseEntity<>(result, HttpStatus.OK);
-	    } else {
-	        return new ResponseEntity<>(result, HttpStatus.PARTIAL_CONTENT);
-	    }
+	public ResponseEntity<BatchResult<Event>> batchSaveOrUpdate(@RequestBody List<Event> events) {
+		BatchResult<Event> result = eventService.saveOrUpdateAll(events);
+		if (result.getFailedOps().isEmpty()) {
+			return ResponseEntity.ok(result);
+		} else {
+			return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(result);
+		}
 	}
 
-	@PostMapping("/events/delete/batch")
-	public ResponseEntity<BatchResult<Long>> deleteEventsBatch(@RequestBody List<Long> eventIds) {
-	    BatchResult<Long> result = eventService.deleteAll(eventIds);
-	    return new ResponseEntity<>(result, HttpStatus.OK);
+	@PostMapping("/delete/batch")
+	public ResponseEntity<BatchResult<Long>> batchDelete(@RequestBody List<Long> eventIds) {
+		BatchResult<Long> result = eventService.deleteAll(eventIds);
+		return ResponseEntity.ok(result);
 	}
 }

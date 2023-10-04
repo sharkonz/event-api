@@ -1,12 +1,8 @@
 package com.alfabet.eventapi.dto;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 import com.alfabet.eventapi.exception.ErrorDetail;
-import com.alfabet.eventapi.model.Subscriber;
-import com.alfabet.eventapi.model.Tag;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

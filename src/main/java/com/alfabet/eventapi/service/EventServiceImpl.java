@@ -26,42 +26,47 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public List<Event> findAll(String location, String sort, String sortOrder) {
-		// Check if sorting order is ascending or descending
 		boolean isAscending = "asc".equalsIgnoreCase(sortOrder);
-
 		if (location != null && !location.isEmpty() && sort != null && !sort.isEmpty()) {
-			switch (sort) {
-			case "date":
-				return isAscending ? eventRepository.findByLocationOrderByDateAsc(location)
-						: eventRepository.findByLocationOrderByDateDesc(location);
-			case "popularity":
-				return isAscending ? eventRepository.findByLocationOrderByPopularityAsc(location)
-						: eventRepository.findByLocationOrderByPopularityDesc(location);
-			case "creationTime":
-				return isAscending ? eventRepository.findByLocationOrderByCreationTimeAsc(location)
-						: eventRepository.findByLocationOrderByCreationTimeDesc(location);
-			default:
-				return eventRepository.findByLocation(location);
-			}
+			return getEventsBasedOnSortAndLocation(location, sort, isAscending);
 		} else if (location != null && !location.isEmpty()) {
 			return eventRepository.findByLocation(location);
 		} else if (sort != null && !sort.isEmpty()) {
-			switch (sort) {
-			case "date":
-				return isAscending ? eventRepository.findAllByOrderByDateAsc()
-						: eventRepository.findAllByOrderByDateDesc();
-			case "popularity":
-				return isAscending ? eventRepository.findAllByOrderByPopularityAsc()
-						: eventRepository.findAllByOrderByPopularityDesc();
-			case "creationTime":
-				return isAscending ? eventRepository.findAllByOrderByCreationTimeAsc()
-						: eventRepository.findAllByOrderByCreationTimeDesc();
-			default:
-				return eventRepository.findAll();
-			}
+			return getEventsBasedOnSort(sort, isAscending);
 		}
 
 		return eventRepository.findAll();
+	}
+
+	private List<Event> getEventsBasedOnSortAndLocation(String location, String sort, boolean isAscending) {
+		switch (sort) {
+		case "date":
+			return isAscending ? eventRepository.findByLocationOrderByDateAsc(location)
+					: eventRepository.findByLocationOrderByDateDesc(location);
+		case "popularity":
+			return isAscending ? eventRepository.findByLocationOrderByPopularityAsc(location)
+					: eventRepository.findByLocationOrderByPopularityDesc(location);
+		case "creationTime":
+			return isAscending ? eventRepository.findByLocationOrderByCreationTimeAsc(location)
+					: eventRepository.findByLocationOrderByCreationTimeDesc(location);
+		default:
+			return eventRepository.findByLocation(location);
+		}
+	}
+
+	private List<Event> getEventsBasedOnSort(String sort, boolean isAscending) {
+		switch (sort) {
+		case "date":
+			return isAscending ? eventRepository.findAllByOrderByDateAsc() : eventRepository.findAllByOrderByDateDesc();
+		case "popularity":
+			return isAscending ? eventRepository.findAllByOrderByPopularityAsc()
+					: eventRepository.findAllByOrderByPopularityDesc();
+		case "creationTime":
+			return isAscending ? eventRepository.findAllByOrderByCreationTimeAsc()
+					: eventRepository.findAllByOrderByCreationTimeDesc();
+		default:
+			return eventRepository.findAll();
+		}
 	}
 
 	@Override
@@ -154,43 +159,23 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public BatchResult<Long> deleteAll(List<Long> eventIds) {
-	    List<Long> successfulDeletes = new ArrayList<>();
-	    List<ErrorDetail<Long>> failedDeletes = new ArrayList<>();
+		List<Long> successfulDeletes = new ArrayList<>();
+		List<ErrorDetail<Long>> failedDeletes = new ArrayList<>();
 
-	    try {
-	        eventRepository.deleteAllByIds(eventIds);
-	        successfulDeletes.addAll(eventIds);
-	    } catch (Exception e) {
-	        // If batch delete fails, try deleting one by one
-	        for (Long id : eventIds) {
-	            try {
-	                eventRepository.deleteById(id);
-	                successfulDeletes.add(id);
-	            } catch (Exception individualEx) {
-	                failedDeletes.add(new ErrorDetail<>(id, individualEx.getMessage()));
-	            }
-	        }
-	    }
-	    return new BatchResult<>(successfulDeletes, failedDeletes);
+		try {
+			eventRepository.deleteAllByIds(eventIds);
+			successfulDeletes.addAll(eventIds);
+		} catch (Exception e) {
+			// If batch delete fails, try deleting one by one
+			for (Long id : eventIds) {
+				try {
+					eventRepository.deleteById(id);
+					successfulDeletes.add(id);
+				} catch (Exception individualEx) {
+					failedDeletes.add(new ErrorDetail<>(id, individualEx.getMessage()));
+				}
+			}
+		}
+		return new BatchResult<>(successfulDeletes, failedDeletes);
 	}
-
-
-
-//	public BatchResult deleteAll(List<Long> eventIds) {
-//		List<Event> successfulDeletes = new ArrayList<>();
-//		List<ErrorDetail<Long>> failedDeletes = new ArrayList<>();
-//
-//		for (Long id : eventIds) {
-//			try {
-//				eventRepository.deleteById(id);
-//				// Assuming you want to return successfully deleted events as well
-//				// If not, you can skip the next line
-//				successfulDeletes.add(new Event(id)); // Create a lightweight event instance just to convey the ID
-//			} catch (Exception e) {
-//				failedDeletes.add(new ErrorDetail<>(id, e.getMessage()));
-//			}
-//		}
-//
-//		return new BatchResult(successfulDeletes, failedDeletes);
-//	}
 }

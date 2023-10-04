@@ -33,7 +33,8 @@ public class EventManagementIntegrationTest {
 	@Test
 	public void testScheduleANewEvent() {
 		Event newEvent = createSampleEvent();
-		ResponseEntity<Event> response = restTemplate.postForEntity("http://localhost:" + port + "/events/events",
+		ResponseEntity<Event> response = restTemplate
+				.postForEntity("http://localhost:" + port + "/events/",
 				newEvent, Event.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
