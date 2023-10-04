@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alfabet.eventapi.dto.BatchResult;
 import com.alfabet.eventapi.model.Event;
 import com.alfabet.eventapi.service.EventService;
 
@@ -67,20 +68,18 @@ public class EventController {
 	}
 
 	@PostMapping("/batch")
-	public ResponseEntity<List<Event>> createEvents(@RequestBody List<Event> events) {
-		List<Event> createdEvents = eventService.saveAll(events);
-		return new ResponseEntity<>(createdEvents, HttpStatus.CREATED);
+	public ResponseEntity<BatchResult<Event>> saveOrUpdateAll(@RequestBody List<Event> events) {
+	    BatchResult<Event> result = eventService.saveOrUpdateAll(events);
+	    if (result.getFailedOps().isEmpty()) {
+	        return new ResponseEntity<>(result, HttpStatus.OK);
+	    } else {
+	        return new ResponseEntity<>(result, HttpStatus.PARTIAL_CONTENT);
+	    }
 	}
 
-	@PutMapping("/batch")
-	public ResponseEntity<List<Event>> updateEvents(@RequestBody List<Event> events) {
-		List<Event> updatedEvents = eventService.updateAll(events);
-		return new ResponseEntity<>(updatedEvents, HttpStatus.OK);
-	}
-
-	@DeleteMapping("/batch")
-	public ResponseEntity<Void> deleteEvents(@RequestBody List<Long> eventIds) {
-		eventService.deleteAllByIds(eventIds);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	@PostMapping("/events/delete/batch")
+	public ResponseEntity<BatchResult<Long>> deleteEventsBatch(@RequestBody List<Long> eventIds) {
+	    BatchResult<Long> result = eventService.deleteAll(eventIds);
+	    return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 }

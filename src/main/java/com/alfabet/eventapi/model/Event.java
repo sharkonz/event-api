@@ -1,4 +1,5 @@
 package com.alfabet.eventapi.model;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,30 +23,28 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Event {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
-    private String description;
-    private String location;
-    private LocalDateTime date;
-    private LocalDateTime creationTime;
-    private int popularity;
 
-    @ManyToMany
-    @JoinTable(
-        name = "event_tag",
-        joinColumns = @JoinColumn(name = "event_id"),
-        inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
-    private Set<Tag> tags = new HashSet<>();
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	private String name;
+	private String description;
+	private String location;
+	private LocalDateTime date;
+	private LocalDateTime creationTime;
+	private int popularity;
 
-    @ManyToMany
-    @JoinTable(
-        name = "event_subscriber",
-        joinColumns = @JoinColumn(name = "event_id"),
-        inverseJoinColumns = @JoinColumn(name = "subscriber_id")
-    )
-    private Set<Subscriber> subscribers = new HashSet<>();
+	@ManyToMany
+	@JoinTable(name = "event_tag", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+	private Set<Tag> tags = new HashSet<>();
+
+	@ManyToMany
+	@JoinTable(name = "event_subscriber", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "subscriber_id"))
+	private Set<Subscriber> subscribers = new HashSet<>();
+	
+    public Event(Long id) {
+		super();
+		this.id = id;
+	}
 
 }

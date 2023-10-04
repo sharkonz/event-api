@@ -1,5 +1,6 @@
 package com.alfabet.eventapi.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.alfabet.eventapi.dto.BatchResult;
+import com.alfabet.eventapi.exception.ErrorDetail;
 import com.alfabet.eventapi.model.Event;
 import com.alfabet.eventapi.repository.EventRepository;
 
@@ -127,20 +130,67 @@ public class EventServiceImpl implements EventService {
 		return eventRepository.findAllByOrderByCreationTimeAsc();
 	}
 
-	@Override
-	public List<Event> saveAll(List<Event> events) {
-		return eventRepository.saveAll(events);
+	public BatchResult<Event> saveOrUpdateAll(List<Event> events) {
+		List<Event> successfulOps = new ArrayList<>();
+		List<ErrorDetail<Long>> failedOps = new ArrayList<>();
+
+		try {
+			// Phase 1: Try bulk save/update
+			successfulOps = eventRepository.saveAll(events);
+		} catch (Exception bulkException) {
+			// Phase 2: If bulk save/update fails, try one by one
+			for (Event event : events) {
+				try {
+					Event savedEvent = eventRepository.save(event);
+					successfulOps.add(savedEvent);
+				} catch (Exception individualException) {
+					failedOps.add(new ErrorDetail<>(event.getId(), individualException.getMessage()));
+				}
+			}
+		}
+
+		return new BatchResult<>(successfulOps, failedOps);
 	}
 
 	@Override
-	public List<Event> updateAll(List<Event> events) {
-		// You'd loop through the events and update them using your logic
-		// For simplicity, we'll just use the saveAll method here
-		return eventRepository.saveAll(events);
+	public BatchResult<Long> deleteAll(List<Long> eventIds) {
+	    List<Long> successfulDeletes = new ArrayList<>();
+	    List<ErrorDetail<Long>> failedDeletes = new ArrayList<>();
+
+	    try {
+	        eventRepository.deleteAllByIds(eventIds);
+	        successfulDeletes.addAll(eventIds);
+	    } catch (Exception e) {
+	        // If batch delete fails, try deleting one by one
+	        for (Long id : eventIds) {
+	            try {
+	                eventRepository.deleteById(id);
+	                successfulDeletes.add(id);
+	            } catch (Exception individualEx) {
+	                failedDeletes.add(new ErrorDetail<>(id, individualEx.getMessage()));
+	            }
+	        }
+	    }
+	    return new BatchResult<>(successfulDeletes, failedDeletes);
 	}
 
-	@Override
-	public void deleteAllByIds(List<Long> ids) {
-		eventRepository.deleteAllById(ids);
-	}
+
+
+//	public BatchResult deleteAll(List<Long> eventIds) {
+//		List<Event> successfulDeletes = new ArrayList<>();
+//		List<ErrorDetail<Long>> failedDeletes = new ArrayList<>();
+//
+//		for (Long id : eventIds) {
+//			try {
+//				eventRepository.deleteById(id);
+//				// Assuming you want to return successfully deleted events as well
+//				// If not, you can skip the next line
+//				successfulDeletes.add(new Event(id)); // Create a lightweight event instance just to convey the ID
+//			} catch (Exception e) {
+//				failedDeletes.add(new ErrorDetail<>(id, e.getMessage()));
+//			}
+//		}
+//
+//		return new BatchResult(successfulDeletes, failedDeletes);
+//	}
 }

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.alfabet.eventapi.dto.BatchResult;
 import com.alfabet.eventapi.model.Event;
 
 public interface EventService {
@@ -27,9 +28,7 @@ public interface EventService {
 
 	List<Event> findAllEventsByOrderByCreationTime();
 
-	List<Event> saveAll(List<Event> events);
+	BatchResult<Event> saveOrUpdateAll(List<Event> events);
 
-	List<Event> updateAll(List<Event> events);
-
-	void deleteAllByIds(List<Long> ids);
+	BatchResult<Long> deleteAll(List<Long> eventIds);
 }
