@@ -58,6 +58,16 @@ mvn spring-boot:run
 
 Once the application is running, you can access the API via `http://localhost:8080/events`.
 
+### Testing
+This project includes a suite of unit and integration tests designed to ensure the correctness of the application.
+
+Running Tests
+To run the tests, you can execute the following Maven command:
+
+ ```
+mvn test
+```
+
 ## API Endpoints
 
 - **Create Event**: `POST /events`
